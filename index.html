@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WC2026 — Steven & James</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0d1b2a;--navy2:#1b2d42;
+  --amber:#f5a623;--amber2:#ffc94d;
+  --red:#c0392b;--green:#27ae60;
+  --cream:#fdf9f0;--ink:#1a1a1a;--muted:#6b7280;
+  --dad:#e67e22;--son:#2980b9;
+  --dadbg:#fff8f0;--sonbg:#f0f7ff;
+  --border:#e5e0d8;--card:#fff;
+  --r:12px;
+}
+body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh}
+
+/* ── HEADER ── */
+header{background:var(--navy);padding:18px 16px 0;text-align:center;position:relative}
+header::after{content:'';display:block;height:4px;background:linear-gradient(90deg,var(--amber),var(--amber2),var(--amber));margin-top:14px}
+.header-trophy{font-size:2rem;margin-bottom:4px}
+header h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.8rem,6vw,2.8rem);color:#fff;letter-spacing:.1em;line-height:1}
+header .sub{font-size:.7rem;color:var(--amber2);letter-spacing:.18em;text-transform:uppercase;margin-top:3px}
+.prize-banner{background:linear-gradient(135deg,var(--amber),#e8941a);margin:12px 16px 0;border-radius:9px;padding:10px 14px;display:flex;align-items:center;gap:10px}
+.prize-banner .pb-icon{font-size:1.6rem;flex-shrink:0}
+.prize-banner .pb-text{font-size:.78rem;font-weight:700;color:var(--navy);line-height:1.4}
+.prize-banner .pb-sub{font-size:.67rem;color:var(--navy2);margin-top:1px;font-weight:400}
+
+/* ── SCOREBOARD ── */
+.scoreboard{display:flex;align-items:stretch;gap:0;margin:12px 16px 0;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.1)}
+.ps{flex:1;padding:11px 8px;text-align:center;position:relative}
+.ps.dad{background:rgba(230,126,34,.18)}
+.ps.son{background:rgba(41,128,185,.18)}
+.ps-role{font-size:.6rem;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,.45);margin-bottom:2px}
+.ps-name{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:#fff;letter-spacing:.06em}
+.ps-score{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;color:#fff;line-height:1.1}
+.ps-lbl{font-size:.58rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.1em}
+.vs-mid{display:flex;align-items:center;justify-content:center;padding:0 8px;font-family:'Bebas Neue',sans-serif;font-size:.85rem;color:rgba(255,255,255,.25)}
+
+/* ── TABS ── */
+.tabs{display:flex;background:var(--navy2);border-bottom:3px solid var(--amber);position:sticky;top:0;z-index:100}
+.tab{flex:1;padding:11px 2px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:.88rem;letter-spacing:.07em;color:rgba(255,255,255,.45);cursor:pointer;border:none;background:none;transition:all .15s}
+.tab.on{color:#fff;background:rgba(255,255,255,.07);border-bottom:3px solid var(--amber2);margin-bottom:-3px}
+
+/* ── PAGES ── */
+.page{display:none}.page.on{display:block}
+.container{max-width:640px;margin:0 auto;padding:16px 14px 80px}
+
+/* ── SECTION ── */
+.sec{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.12em;color:var(--navy);border-bottom:2px solid var(--amber);padding-bottom:3px;margin:22px 0 12px;display:flex;align-items:center;gap:7px}
+
+/* ── MATCH CARD ── */
+.match-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden;transition:box-shadow .2s}
+.match-card:hover{box-shadow:0 3px 16px rgba(0,0,0,.07)}
+.match-card.fr-match{border-left:4px solid #002395}
+.match-card.sc-match{border-left:4px solid #003399}
+.match-card.big{border-left:4px solid var(--amber)}
+.match-card.done{border-left:4px solid var(--green)}
+
+/* MATCH HEADER */
+.match-head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none}
+.match-flags{display:flex;gap:2px;font-size:1.3rem;flex-shrink:0}
+.match-centre{flex:1;min-width:0}
+.match-name{font-size:.88rem;font-weight:700;line-height:1.2}
+.editable-team{display:inline;border-bottom:1px dashed #ccc;cursor:text;outline:none;font-weight:700}
+.editable-team:focus{border-bottom:1px solid var(--amber);background:#fffbef;border-radius:2px}
+.match-info{font-size:.63rem;color:var(--muted);margin-top:2px}
+.match-right{text-align:right;flex-shrink:0}
+.match-time{font-size:.78rem;font-weight:700;white-space:nowrap}
+.match-date{font-size:.62rem;color:var(--muted);white-space:nowrap}
+.match-status{font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:10px;margin-top:3px;display:inline-block}
+.ms-open{background:#f0f0f0;color:var(--muted)}
+.ms-partial{background:#fff8e8;color:#9a7000}
+.ms-locked{background:#e8f5e9;color:var(--green)}
+.ms-done{background:var(--green);color:#fff}
+
+/* MATCH BODY */
+.match-body{display:none;border-top:1px solid var(--border)}
+.match-body.open{display:block}
+
+/* PERSON PREDICTION PANEL */
+.person-panel{padding:14px 14px 12px;border-bottom:1px solid var(--border)}
+.person-panel:last-of-type{border-bottom:none}
+.person-panel.dad-panel{background:var(--dadbg)}
+.person-panel.son-panel{background:var(--sonbg)}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.panel-who{display:flex;align-items:center;gap:7px}
+.panel-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;color:#fff;flex-shrink:0}
+.av-dad{background:var(--dad)}
+.av-son{background:var(--son)}
+.panel-name{font-size:.88rem;font-weight:700}
+.panel-role{font-size:.62rem;color:var(--muted);font-weight:400}
+.locked-badge{font-size:.67rem;font-weight:700;padding:3px 9px;border-radius:10px;background:var(--green);color:#fff;display:flex;align-items:center;gap:3px}
+.locked-badge.pending{background:#f0f0f0;color:var(--muted)}
+
+/* SCORE INPUT */
+.score-section{margin-bottom:10px}
+.score-lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px;font-weight:600}
+.score-row{display:flex;align-items:center;gap:8px}
+.team-lbl{font-size:.78rem;font-weight:600;flex:1;text-align:center;line-height:1.2}
+.score-box{width:48px;height:48px;border:2px solid var(--border);border-radius:9px;font-family:'Inter',sans-serif;font-size:1.4rem;font-weight:700;text-align:center;outline:none;background:#fff;padding:0;transition:border .15s;flex-shrink:0}
+.score-box:focus{border-color:var(--amber)}
+.score-box:disabled{background:#f5f5f5;color:#999;border-color:#e0e0e0}
+.score-dash{font-size:1.4rem;font-weight:300;color:var(--muted);flex-shrink:0}
+
+/* BONUS QUESTIONS */
+.bonus-section{margin-top:8px}
+.bonus-lbl{font-size:.63rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px;font-weight:600;display:flex;align-items:center;gap:5px}
+.bonus-lbl span{background:var(--amber);color:var(--navy);font-size:.58rem;padding:1px 5px;border-radius:8px;font-weight:700}
+.bonus-q{background:#fff;border:1.5px solid var(--border);border-radius:9px;padding:9px 11px;margin-bottom:6px}
+.bonus-q.dad-q{border-color:rgba(230,126,34,.3)}
+.bonus-q.son-q{border-color:rgba(41,128,185,.3)}
+.bq-text{font-size:.78rem;font-weight:600;margin-bottom:6px;line-height:1.35}
+.bq-options{display:flex;gap:5px;flex-wrap:wrap}
+.bq-opt{padding:6px 10px;border-radius:7px;border:1.5px solid var(--border);background:#fafafa;font-size:.74rem;font-weight:500;cursor:pointer;color:var(--muted);transition:all .15s}
+.bq-opt:hover:not(:disabled){border-color:#aaa}
+.bq-opt.sel-dad{background:var(--dadbg);border-color:var(--dad);color:var(--dad);font-weight:700}
+.bq-opt.sel-son{background:var(--sonbg);border-color:var(--son);color:var(--son);font-weight:700}
+.bq-opt:disabled{opacity:.6;cursor:default}
+.bq-input{width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 9px;font-family:'Inter',sans-serif;font-size:.78rem;outline:none;color:var(--ink)}
+.bq-input:focus{border-color:var(--amber)}
+.bq-input:disabled{background:#f5f5f5;color:#999}
+
+/* SUBMIT BUTTON */
+.submit-btn{width:100%;padding:12px;border-radius:9px;border:none;font-family:'Inter',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .2s;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:7px}
+.submit-dad{background:var(--dad);color:#fff}
+.submit-dad:hover:not(:disabled){background:#d35400}
+.submit-son{background:var(--son);color:#fff}
+.submit-son:hover:not(:disabled){background:#2471a3}
+.submit-btn:disabled{background:#ccc;color:#888;cursor:default}
+.submit-btn.locked-state{background:var(--green);cursor:default}
+
+/* RESULT SECTION */
+.result-section{padding:12px 14px;background:#f9f9f9;border-top:1px solid var(--border)}
+.result-lbl{font-size:.63rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:7px;font-weight:600}
+.result-btns{display:flex;gap:6px}
+.res-btn{flex:1;padding:9px 6px;border-radius:8px;border:1.5px solid var(--border);font-size:.76rem;font-weight:700;cursor:pointer;background:#fff;color:var(--muted);text-align:center;transition:all .15s}
+.res-btn:hover{background:var(--cream)}
+.res-btn.r-dad{background:var(--dad);border-color:var(--dad);color:#fff}
+.res-btn.r-draw{background:var(--amber);border-color:var(--amber);color:var(--navy)}
+.res-btn.r-son{background:var(--son);border-color:var(--son);color:#fff}
+.points-display{display:flex;gap:8px;margin-top:10px}
+.pts-box{flex:1;text-align:center;padding:8px;border-radius:8px;font-size:.72rem}
+.pts-box.dad-pts{background:var(--dadbg);color:var(--dad)}
+.pts-box.son-pts{background:var(--sonbg);color:var(--son)}
+.pts-num{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;line-height:1;display:block}
+.pts-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em}
+
+/* COMMENT SECTION */
+.comment-section{padding:12px 14px;border-top:1px solid var(--border)}
+.comment-list{display:flex;flex-direction:column;gap:5px;margin-bottom:8px;max-height:160px;overflow-y:auto}
+.comment-item{display:flex;gap:7px;align-items:flex-start}
+.ci-avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;flex-shrink:0;margin-top:1px}
+.ci-bubble{background:#f0ece4;border-radius:8px;padding:5px 9px;flex:1;font-size:.77rem;line-height:1.4}
+.ci-time{font-size:.57rem;color:var(--muted);flex-shrink:0;margin-top:3px}
+.comment-input-row{display:flex;gap:6px}
+.ci-who{display:flex;gap:4px}
+.ci-who-btn{padding:6px 10px;border-radius:7px;border:1.5px solid var(--border);font-size:.7rem;font-weight:700;cursor:pointer;background:#fff;transition:all .15s;white-space:nowrap}
+.ci-who-btn.sel-dad{background:var(--dad);border-color:var(--dad);color:#fff}
+.ci-who-btn.sel-son{background:var(--son);border-color:var(--son);color:#fff}
+.ci-input{flex:1;border:1.5px solid var(--border);border-radius:7px;padding:7px 9px;font-family:'Inter',sans-serif;font-size:.76rem;outline:none}
+.ci-input:focus{border-color:var(--amber)}
+.ci-send{padding:7px 12px;border-radius:7px;background:var(--navy);border:none;color:#fff;font-size:.72rem;font-weight:600;cursor:pointer;flex-shrink:0}
+
+/* SCHEDULE */
+.schedule-filter{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px}
+.sf-btn{padding:5px 11px;border-radius:18px;border:1.5px solid var(--border);background:#fff;font-size:.7rem;font-weight:500;cursor:pointer;color:var(--muted);transition:all .15s}
+.sf-btn.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.sched-group{margin-bottom:18px}
+.sg-title{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);padding:6px 0 7px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.sched-row{display:flex;align-items:center;gap:9px;padding:8px 11px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:5px}
+.sched-row.highlight{border-left:3px solid var(--amber);background:#fffdf5}
+.sched-row.fr{border-left:3px solid #002395}
+.sched-row.sc{border-left:3px solid #003399}
+.sched-flags{font-size:1.1rem;flex-shrink:0}
+.sched-match{flex:1;min-width:0}
+.sched-teams{font-size:.82rem;font-weight:600;line-height:1.2}
+.sched-venue{font-size:.62rem;color:var(--muted);margin-top:1px}
+.sched-time-col{text-align:right;flex-shrink:0}
+.sched-time{font-size:.78rem;font-weight:700;white-space:nowrap}
+.sched-date{font-size:.61rem;color:var(--muted)}
+
+/* LIVRE D'OR */
+.livre-entry{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;margin-bottom:9px}
+.le-match{font-size:.82rem;font-weight:700}
+.le-meta{font-size:.63rem;color:var(--muted);margin-bottom:8px;margin-top:1px}
+.le-comment{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #f0ebe4;font-size:.78rem;line-height:1.4}
+.le-comment:last-child{border-bottom:none;padding-bottom:0}
+.lc-who{font-size:.66rem;font-weight:700;flex-shrink:0;padding-top:1px}
+.lc-who.dad{color:var(--dad)}.lc-who.son{color:var(--son)}
+.export-btn{background:var(--amber);color:var(--navy);border:none;border-radius:8px;padding:10px;font-family:'Inter',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;width:100%;margin-top:8px}
+
+/* SUMMARY */
+.sum-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.sum-stat{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)}
+.sum-stat:last-child{border-bottom:none}
+.sum-label{font-size:.8rem;color:var(--muted)}
+.sum-val{font-size:.85rem;font-weight:700}
+.final-winner{background:linear-gradient(135deg,var(--amber),#e8941a);border-radius:var(--r);padding:16px;text-align:center;margin-bottom:14px}
+.fw-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.14em;color:var(--navy2);font-weight:700}
+.fw-name{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--navy);letter-spacing:.08em;line-height:1.1;margin-top:4px}
+.fw-sub{font-size:.75rem;color:var(--navy2);margin-top:4px}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;padding:9px 18px;border-radius:20px;font-size:.76rem;font-weight:600;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:999}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.empty{color:var(--muted);font-size:.8rem;text-align:center;padding:20px;font-style:italic}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-trophy">🏆</div>
+  <h1>World Cup 2026</h1>
+  <div class="sub">Steven & James — Father & Son</div>
+  <div class="prize-banner">
+    <div class="pb-icon">🍽️</div>
+    <div>
+      <div class="pb-text">The Prize: A Proper Restaurant Lunch</div>
+      <div class="pb-sub">Winner picks the restaurant. Loser pays. No arguing.</div>
+    </div>
+  </div>
+  <div class="scoreboard">
+    <div class="ps dad">
+      <div class="ps-role">Father</div>
+      <div class="ps-name">Steven</div>
+      <div class="ps-score" id="dadScore">0</div>
+      <div class="ps-lbl">points</div>
+    </div>
+    <div class="vs-mid">VS</div>
+    <div class="ps son">
+      <div class="ps-role">Son</div>
+      <div class="ps-name">James</div>
+      <div class="ps-score" id="sonScore">0</div>
+      <div class="ps-lbl">points</div>
+    </div>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab on"   onclick="showPage('matches',this)">⚽ Bets</button>
+  <button class="tab"      onclick="showPage('schedule',this)">📅 Schedule</button>
+  <button class="tab"      onclick="showPage('livre',this)">📖 Livre d'Or</button>
+  <button class="tab"      onclick="showPage('summary',this)">🏅 Scores</button>
+</div>
+
+<!-- BETS -->
+<div class="page on" id="page-matches">
+  <div class="container">
+    <div style="background:#e8f5e9;border-radius:9px;padding:10px 13px;font-size:.76rem;color:#2e7d32;margin-bottom:14px;line-height:1.5;border:1px solid #c8e6c9">
+      <strong>How to play:</strong> Each person fills in their predicted score and answers the bonus questions, then taps <strong>Lock in my prediction</strong>. Once locked, it can't be changed! 1 point for correct result, +1 for exact score. Bonus questions earn ½ point each.
+    </div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px" id="matchFilter"></div>
+    <div id="matchGrid"></div>
+  </div>
+</div>
+
+<!-- SCHEDULE -->
+<div class="page" id="page-schedule">
+  <div class="container">
+    <div class="sec">📅 Full Schedule <span style="font-size:.7rem;font-weight:400;color:var(--muted);letter-spacing:0;font-family:'Inter'">&nbsp;BST times</span></div>
+    <div class="schedule-filter" id="schedFilter"></div>
+    <div id="schedGrid"></div>
+  </div>
+</div>
+
+<!-- LIVRE D'OR -->
+<div class="page" id="page-livre">
+  <div class="container">
+    <div class="sec">📖 Livre d'Or</div>
+    <p style="font-size:.76rem;color:var(--muted);margin-bottom:12px;line-height:1.5">Your shared memory of the tournament — comments and reactions match by match. Export at the end to keep forever.</p>
+    <button class="export-btn" onclick="exportLivre()">⬇️ Export Livre d'Or as text</button>
+    <div style="margin-top:14px" id="livreGrid"></div>
+  </div>
+</div>
+
+<!-- SUMMARY / SCORES -->
+<div class="page" id="page-summary">
+  <div class="container">
+    <div id="winnerBanner"></div>
+    <div class="sec">🏅 Scoreboard</div>
+    <div class="sum-card">
+      <div class="sum-stat"><span class="sum-label">Steven (Dad) — total points</span><span class="sum-val" style="color:var(--dad)" id="sumDad">0</span></div>
+      <div class="sum-stat"><span class="sum-label">James (Son) — total points</span><span class="sum-val" style="color:var(--son)" id="sumSon">0</span></div>
+      <div class="sum-stat"><span class="sum-label">Matches settled</span><span class="sum-val" id="sumSettled">0</span></div>
+      <div class="sum-stat"><span class="sum-label">Bets still open</span><span class="sum-val" id="sumOpen">0</span></div>
+    </div>
+    <div class="sec">📋 Match by match</div>
+    <div id="sumDetail"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── MATCHES ─────────────────────────────────────────────────────────────────
+// betType: 'scoreline' always (we do score + bonus)
+// bonus: array of {q, type:'options'|'number', opts?:[]}
+const MATCHES = [
+  // OPENER
+  { id:'open1', stage:'Opening Match', date:'Thu 11 Jun', time:'20:00',
+    h:'Mexico', a:'South Africa', flags:'🇲🇽🇿🇦', venue:'Estadio Azteca, Mexico City',
+    big:true,
+    bonus:[
+      {q:'How many goals total in this match?', type:'options', opts:['0–1','2–3','4–5','6+']},
+      {q:'Will there be a red card?', type:'options', opts:['Yes','No']},
+    ]},
+
+  // GROUP C — SCOTLAND
+  { id:'C2', stage:'Scotland', date:'Sun 14 Jun', time:'02:00',
+    h:'Haiti', a:'Scotland', flags:'🇭🇹🏴󠁧󠁢󠁳󠁣󠁴󠁿', venue:'MetLife Stadium, NJ',
+    sc:true,
+    bonus:[
+      {q:'Does Scotland score in the first half?', type:'options', opts:['Yes','No']},
+      {q:'How many corners will Scotland win?', type:'options', opts:['0–2','3–5','6+']},
+    ]},
+  { id:'C3', stage:'Scotland', date:'Thu 19 Jun', time:'23:00',
+    h:'Scotland', a:'Morocco', flags:'🏴󠁧󠁢󠁳󠁣󠁴󠁿🇲🇦', venue:'Lincoln Financial Field, Philadelphia',
+    sc:true,
+    bonus:[
+      {q:'Will Scotland keep a clean sheet?', type:'options', opts:['Yes','No']},
+      {q:'Any red cards in this match?', type:'options', opts:['Yes','No']},
+    ]},
+  { id:'C5', stage:'Scotland', date:'Tue 24 Jun', time:'23:00',
+    h:'Scotland', a:'Brazil', flags:'🏴󠁧󠁢󠁳󠁣󠁴󠁿🇧🇷', venue:'Hard Rock Stadium, Miami',
+    sc:true,
+    bonus:[
+      {q:'Does Scotland score against Brazil?', type:'options', opts:['Yes','No']},
+      {q:'How many goals does Brazil score?', type:'options', opts:['0','1','2','3+']},
+    ]},
+
+  // BIG NATIONS
+  { id:'E2', stage:'Big Nations', date:'Sun 15 Jun', time:'00:00',
+    h:'Germany', a:'Curaçao', flags:'🇩🇪🇨🇼', venue:'NRG Stadium, Houston',
+    big:true,
+    bonus:[
+      {q:'Germany win by how many goals?', type:'options', opts:['1','2','3','4+']},
+      {q:'Does Germany keep a clean sheet?', type:'options', opts:['Yes','No']},
+    ]},
+  { id:'J1', stage:'Big Nations', date:'Sun 15 Jun', time:'23:00',
+    h:'Argentina', a:'Austria', flags:'🇦🇷🇦🇹', venue:'Lincoln Financial Field, Philadelphia',
+    big:true,
+    bonus:[
+      {q:'Does Messi score or assist?', type:'options', opts:['Yes','No']},
+      {q:'Any red cards?', type:'options', opts:['Yes','No']},
+    ]},
+  { id:'L1', stage:'Big Nations', date:'Tue 17 Jun', time:'21:00',
+    h:'England', a:'Croatia', flags:'🏴󠁧󠁢󠁥󠁮󠁧󁿢🇭🇷', venue:'AT&T Stadium, Arlington',
+    big:true,
+    bonus:[
+      {q:'Does England win without conceding?', type:'options', opts:['Yes','No']},
+      {q:'Total goals in the match?', type:'options', opts:['0–1','2','3','4+']},
+    ]},
+  { id:'J5', stage:'Big Nations', date:'Fri 26 Jun', time:'03:00',
+    h:'Argentina', a:'Portugal', flags:'🇦🇷🇵🇹', venue:'MetLife Stadium, NJ',
+    big:true,
+    bonus:[
+      {q:'Does Ronaldo score?', type:'options', opts:['Yes','No']},
+      {q:'Any penalty in this match?', type:'options', opts:['Yes','No']},
+    ]},
+  { id:'H5', stage:'Big Nations', date:'Fri 26 Jun', time:'02:00',
+    h:'Spain', a:'Uruguay', flags:'🇪🇸🇺🇾', venue:'AT&T Stadium, Arlington',
+    big:true,
+    bonus:[
+      {q:'Total yellow cards in this match?', type:'options', opts:['0–2','3–4','5+']},
+      {q:'Does Spain keep possession above 60%?', type:'options', opts:['Yes','No']},
+    ]},
+
+  // FRANCE
+  { id:'I1', stage:'France', date:'Mon 16 Jun', time:'23:00',
+    h:'France', a:'Senegal', flags:'🇫🇷🇸🇳', venue:'MetLife Stadium, NJ',
+    fr:true,
+    bonus:[
+      {q:'Does Mbappé score?', type:'options', opts:['Yes','No']},
+      {q:'France win to nil?', type:'options', opts:['Yes','No']},
+    ]},
+  { id:'I4', stage:'France', date:'Sun 21 Jun', time:'02:00',
+    h:'France', a:'Iraq', flags:'🇫🇷🇮🇶', venue:'NRG Stadium, Houston',
+    fr:true,
+    bonus:[
+      {q:'How many goals does France score?', type:'options', opts:['1','2','3','4+']},
+      {q:'Any red cards?', type:'options', opts:['Yes','No']},
+    ]},
+  { id:'I5', stage:'France', date:'Wed 25 Jun', time:'23:00',
+    h:'France', a:'Norway', flags:'🇫🇷🇳🇴', venue:'BC Place, Vancouver',
+    fr:true,
+    bonus:[
+      {q:'Does France top Group I?', type:'options', opts:['Yes','No']},
+      {q:'Total goals in the match?', type:'options', opts:['0–1','2–3','4+']},
+    ]},
+
+  // KNOCKOUTS
+  { id:'R16a', stage:'Round of 16', date:'Wed 8 Jul', time:'TBD',
+    h:'TBD', a:'TBD', flags:'⚽⚽', venue:'TBD', editable:true,
+    bonus:[
+      {q:'Does this go to extra time?', type:'options', opts:['Yes','No']},
+      {q:'Any red cards?', type:'options', opts:['Yes','No']},
+    ]},
+  { id:'R16b', stage:'Round of 16', date:'Wed 8 Jul', time:'TBD',
+    h:'TBD', a:'TBD', flags:'⚽⚽', venue:'TBD', editable:true,
+    bonus:[
+      {q:'Does this go to extra time?', type:'options', opts:['Yes','No']},
+      {q:'Any red cards?', type:'options', opts:['Yes','No']},
+    ]},
+  { id:'R16c', stage:'Round of 16', date:'Thu 9 Jul', time:'TBD',
+    h:'TBD', a:'TBD', flags:'⚽⚽', venue:'TBD', editable:true,
+    bonus:[
+      {q:'Does this go to extra time?', type:'options', opts:['Yes','No']},
+      {q:'Any red cards?', type:'options', opts:['Yes','No']},
+    ]},
+  { id:'R16d', stage:'Round of 16', date:'Thu 9 Jul', time:'TBD',
+    h:'TBD', a:'TBD', flags:'⚽⚽', venue:'TBD', editable:true,
+    bonus:[
+      {q:'Does this go to extra time?', type:'options', opts:['Yes','No']},
+      {q:'Any red cards?', type:'options', opts:['Yes','No']},
+    ]},
+
+  // QF
+  { id:'QFa', stage:'Quarter-finals', date:'Mon 13 Jul', time:'TBD',
+    h:'TBD', a:'TBD', flags:'⚽⚽', venue:'TBD', editable:true,
+    bonus:[
+      {q:'Penalty shootout?', type:'options', opts:['Yes','No']},
+      {q:'Total goals (90 mins)?', type:'options', opts:['0–1','2','3','4+']},
+    ]},
+  { id:'QFb', stage:'Quarter-finals', date:'Mon 13 Jul', time:'TBD',
+    h:'TBD', a:'TBD', flags:'⚽⚽', venue:'TBD', editable:true,
+    bonus:[
+      {q:'Penalty shootout?', type:'options', opts:['Yes','No']},
+      {q:'Total goals (90 mins)?', type:'options', opts:['0–1','2','3','4+']},
+    ]},
+  { id:'QFc', stage:'Quarter-finals', date:'Tue 14 Jul', time:'TBD',
+    h:'TBD', a:'TBD', flags:'⚽⚽', venue:'TBD', editable:true,
+    bonus:[
+      {q:'Penalty shootout?', type:'options', opts:['Yes','No']},
+      {q:'Total goals (90 mins)?', type:'options', opts:['0–1','2','3','4+']},
+    ]},
+  { id:'QFd', stage:'Quarter-finals', date:'Tue 14 Jul', time:'TBD',
+    h:'TBD', a:'TBD', flags:'⚽⚽', venue:'TBD', editable:true,
+    bonus:[
+      {q:'Penalty shootout?', type:'options', opts:['Yes','No']},
+      {q:'Total goals (90 mins)?', type:'options', opts:['0–1','2','3','4+']},
+    ]},
+
+  // SF
+  { id:'SFa', stage:'Semi-finals', date:'Thu 16 Jul', time:'TBD',
+    h:'TBD', a:'TBD', flags:'⚽⚽', venue:'TBD', editable:true, big:true,
+    bonus:[
+      {q:'Penalty shootout?', type:'options', opts:['Yes','No']},
+      {q:'Does the match go to extra time?', type:'options', opts:['Yes','No']},
+    ]},
+  { id:'SFb', stage:'Semi-finals', date:'Fri 17 Jul', time:'TBD',
+    h:'TBD', a:'TBD', flags:'⚽⚽', venue:'TBD', editable:true, big:true,
+    bonus:[
+      {q:'Penalty shootout?', type:'options', opts:['Yes','No']},
+      {q:'Does the match go to extra time?', type:'options', opts:['Yes','No']},
+    ]},
+
+  // FINAL
+  { id:'FIN', stage:'🏆 The Final', date:'Sun 19 Jul', time:'20:00',
+    h:'TBD', a:'TBD', flags:'🏆🏆', venue:'MetLife Stadium, New York / New Jersey',
+    editable:true, big:true,
+    bonus:[
+      {q:'Penalty shootout in the final?', type:'options', opts:['Yes','No']},
+      {q:'How many red cards in the final?', type:'options', opts:['0','1','2+']},
+      {q:'First goal — before or after 30 mins?', type:'options', opts:['Before 30\'','After 30\'','No goals 90\'']},
+    ]},
+];
+
+// ─── FULL SCHEDULE (for reference tab) ───────────────────────────────────────
+const SCHEDULE = [
+  {group:'Opening', date:'11 Jun', time:'20:00', h:'Mexico', a:'South Africa', flags:'🇲🇽🇿🇦', venue:'Estadio Azteca, Mexico City', big:true},
+  {group:'Group A', date:'11 Jun', time:'03:00+', h:'South Korea', a:'Czechia', flags:'🇰🇷🇨🇿', venue:'Estadio Akron, Zapopan'},
+  {group:'Group B', date:'12 Jun', time:'20:00', h:'Canada', a:'Bosnia & Herz.', flags:'🇨🇦🇧🇦', venue:'BMO Field, Toronto'},
+  {group:'Group B', date:'13 Jun', time:'20:00', h:'Qatar', a:'Switzerland', flags:'🇶🇦🇨🇭', venue:"Levi's Stadium, Santa Clara"},
+  {group:'Group C', date:'13 Jun', time:'23:00', h:'Brazil', a:'Morocco', flags:'🇧🇷🇲🇦', venue:'Gillette Stadium, Boston', big:true},
+  {group:'Group C', date:'14 Jun', time:'02:00', h:'Haiti', a:'Scotland', flags:'🇭🇹🏴󠁧󠁢󠁳󠁣󠁴󠁿', venue:'MetLife Stadium, NJ', sc:true},
+  {group:'Group D', date:'13 Jun', time:'02:00', h:'USA', a:'Paraguay', flags:'🇺🇸🇵🇾', venue:'SoFi Stadium, LA', big:true},
+  {group:'Group D', date:'14 Jun', time:'05:00', h:'Australia', a:'Türkiye', flags:'🇦🇺🇹🇷', venue:'BC Place, Vancouver'},
+  {group:'Group E', date:'14 Jun', time:'18:00', h:'Ivory Coast', a:'Ecuador', flags:'🇨🇮🇪🇨', venue:'Lincoln Financial, Philadelphia'},
+  {group:'Group E', date:'15 Jun', time:'00:00', h:'Germany', a:'Curaçao', flags:'🇩🇪🇨🇼', venue:'NRG Stadium, Houston', big:true},
+  {group:'Group F', date:'14 Jun', time:'21:00', h:'Netherlands', a:'Japan', flags:'🇳🇱🇯🇵', venue:'AT&T Stadium, Arlington', big:true},
+  {group:'Group F', date:'15 Jun', time:'03:00', h:'Sweden', a:'Tunisia', flags:'🇸🇪🇹🇳', venue:'Estadio BBVA, Guadalupe'},
+  {group:'Group G', date:'15 Jun', time:'20:00', h:'Belgium', a:'Egypt', flags:'🇧🇪🇪🇬', venue:'Lumen Field, Seattle', big:true},
+  {group:'Group G', date:'16 Jun', time:'02:00', h:'Iran', a:'New Zealand', flags:'🇮🇷🇳🇿', venue:'SoFi Stadium, LA'},
+  {group:'Group H', date:'15 Jun', time:'17:00', h:'Spain', a:'Cape Verde', flags:'🇪🇸🇨🇻', venue:'Mercedes-Benz Stadium, Atlanta', big:true},
+  {group:'Group H', date:'15 Jun', time:'23:00', h:'Saudi Arabia', a:'Uruguay', flags:'🇸🇦🇺🇾', venue:'Hard Rock Stadium, Miami'},
+  {group:'Group I', date:'16 Jun', time:'23:00', h:'France', a:'Senegal', flags:'🇫🇷🇸🇳', venue:'MetLife Stadium, NJ', fr:true, big:true},
+  {group:'Group I', date:'17 Jun', time:'20:00', h:'Norway', a:'Iraq', flags:'🇳🇴🇮🇶', venue:'Lumen Field, Seattle'},
+  {group:'Group J', date:'15 Jun', time:'23:00', h:'Argentina', a:'Austria', flags:'🇦🇷🇦🇹', venue:'Lincoln Financial, Philadelphia', big:true},
+  {group:'Group J', date:'16 Jun', time:'02:00', h:'Portugal', a:'DR Congo', flags:'🇵🇹🇨🇩', venue:'SoFi Stadium, LA', big:true},
+  {group:'Group K', date:'16 Jun', time:'18:00', h:'Colombia', a:'Cameroon', flags:'🇨🇴🇨🇲', venue:'AT&T Stadium, Arlington'},
+  {group:'Group L', date:'17 Jun', time:'21:00', h:'England', a:'Croatia', flags:'🏴󠁧󠁢󠁥󠁮󠁧󁿢🇭🇷', venue:'AT&T Stadium, Arlington', big:true},
+  {group:'Group C', date:'19 Jun', time:'23:00', h:'Scotland', a:'Morocco', flags:'🏴󠁧󠁢󠁳󠁣󠁴󠁿🇲🇦', venue:'Lincoln Financial, Philadelphia', sc:true},
+  {group:'Group I', date:'21 Jun', time:'02:00', h:'France', a:'Iraq', flags:'🇫🇷🇮🇶', venue:'NRG Stadium, Houston', fr:true},
+  {group:'Group J', date:'26 Jun', time:'03:00', h:'Argentina', a:'Portugal', flags:'🇦🇷🇵🇹', venue:'MetLife Stadium, NJ', big:true},
+  {group:'Group H', date:'26 Jun', time:'02:00', h:'Spain', a:'Uruguay', flags:'🇪🇸🇺🇾', venue:'AT&T Stadium, Arlington', big:true},
+  {group:'Group C', date:'24 Jun', time:'23:00', h:'Scotland', a:'Brazil', flags:'🏴󠁧󠁢󠁳󠁣󠁴󠁿🇧🇷', venue:'Hard Rock Stadium, Miami', sc:true},
+  {group:'Group I', date:'25 Jun', time:'23:00', h:'France', a:'Norway', flags:'🇫🇷🇳🇴', venue:'BC Place, Vancouver', fr:true},
+  {group:'Round of 16', date:'8–6 Jul', time:'TBD', h:'R16 matches', a:'(×8)', flags:'⚽', venue:'Various venues'},
+  {group:'Quarter-finals', date:'13–14 Jul', time:'TBD', h:'QF matches', a:'(×4)', flags:'⚽', venue:'Various venues', big:true},
+  {group:'Semi-finals', date:'16–17 Jul', time:'TBD', h:'SF matches', a:'(×2)', flags:'⚽', venue:'Various venues', big:true},
+  {group:'Third place', date:'18 Jul', time:'TBD', h:'3rd place play-off', a:'', flags:'🥉', venue:'TBD'},
+  {group:'🏆 Final', date:'19 Jul', time:'20:00', h:'THE FINAL', a:'', flags:'🏆', venue:'MetLife Stadium, New York / New Jersey', big:true},
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let state = { matches:{}, comments:{}, nextId:1 };
+
+function initMatches(){
+  MATCHES.forEach(m=>{
+    if(!state.matches[m.id]){
+      state.matches[m.id]={
+        homeTeam:m.h, awayTeam:m.a,
+        dad:{ scoreH:'', scoreA:'', bonus:{}, locked:false },
+        son:{ scoreH:'', scoreA:'', bonus:{}, locked:false },
+        result:null, // 'h'|'d'|'a' (home win / draw / away win)
+        actualH:'', actualA:'',
+        dadPts:0, sonPts:0,
+      };
+    }
+    if(!state.comments[m.id]) state.comments[m.id]=[];
+  });
+}
+
+function load(){
+  try{const s=JSON.parse(localStorage.getItem('wc26sj1')||'{}');if(s.matches){state={...state,...s};}}catch{}
+  initMatches();
+}
+function save(){localStorage.setItem('wc26sj1',JSON.stringify(state));}
+load();
+
+// UI state
+let openMatches=new Set();
+let matchFilter='all';
+let schedFilter='all';
+let commentAuthor='dad';
+
+// ─── SCORING ─────────────────────────────────────────────────────────────────
+function calcPoints(md, m){
+  // result outcome
+  const actualResult = md.actualH!=='' && md.actualA!==''
+    ? (parseInt(md.actualH)>parseInt(md.actualA)?'h':parseInt(md.actualH)<parseInt(md.actualA)?'a':'d')
+    : null;
+
+  let dadPts=0, sonPts=0;
+  if(!actualResult) return {dadPts:0,sonPts:0};
+
+  ['dad','son'].forEach(who=>{
+    const p = md[who];
+    if(!p.locked) return;
+    let pts=0;
+    // 1 pt for correct result
+    const predResult = p.scoreH!=='' && p.scoreA!==''
+      ? (parseInt(p.scoreH)>parseInt(p.scoreA)?'h':parseInt(p.scoreH)<parseInt(p.scoreA)?'a':'d')
+      : null;
+    if(predResult && predResult===actualResult) pts+=1;
+    // +1 for exact score
+    if(p.scoreH!=='' && p.scoreA!=='' && parseInt(p.scoreH)===parseInt(md.actualH) && parseInt(p.scoreA)===parseInt(md.actualA)) pts+=1;
+    // 0.5 per correct bonus (compare against result-recorded answers stored in md.bonusAnswers)
+    if(md.bonusAnswers){
+      (m.bonus||[]).forEach((bq,i)=>{
+        const correct=md.bonusAnswers[i];
+        const pred=p.bonus[i];
+        if(correct!==undefined && correct!=='' && pred!==undefined && pred!=='' && pred===correct) pts+=0.5;
+      });
+    }
+    if(who==='dad') dadPts=pts; else sonPts=pts;
+  });
+  return {dadPts,sonPts};
+}
+
+// ─── RENDER MATCHES ───────────────────────────────────────────────────────────
+const FILTER_STAGES=['all','Scotland','France','Opening Match','Big Nations','Round of 16','Quarter-finals','Semi-finals','🏆 The Final'];
+
+function renderMatchFilter(){
+  document.getElementById('matchFilter').innerHTML=FILTER_STAGES.map(f=>
+    `<button style="padding:5px 11px;border-radius:18px;border:1.5px solid ${matchFilter===f?'var(--navy)':'var(--border)'};background:${matchFilter===f?'var(--navy)':'#fff'};font-size:.69rem;font-weight:500;cursor:pointer;color:${matchFilter===f?'#fff':'var(--muted)'};" onclick="setMF('${f}')">${f==='all'?'All':f}</button>`
+  ).join('');
+}
+
+function filteredMatches(){
+  if(matchFilter==='all') return MATCHES;
+  return MATCHES.filter(m=>m.stage===matchFilter);
+}
+
+function renderMatches(){
+  const list=filteredMatches();
+  const byStage={};
+  list.forEach(m=>{if(!byStage[m.stage])byStage[m.stage]=[];byStage[m.stage].push(m);});
+  const grid=document.getElementById('matchGrid');
+  if(!list.length){grid.innerHTML='<div class="empty">No matches in this filter.</div>';return;}
+
+  grid.innerHTML=Object.keys(byStage).map(stage=>{
+    const cards=byStage[stage].map(m=>renderMatchCard(m)).join('');
+    return `<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);padding:8px 0 5px;border-bottom:1px solid var(--border);margin-bottom:7px;display:flex;justify-content:space-between">${stage}<span style="font-weight:400">${byStage[stage].length} match${byStage[stage].length>1?'es':''}</span></div>${cards}`;
+  }).join('');
+}
+
+function renderMatchCard(m){
+  const md=state.matches[m.id];
+  const isOpen=openMatches.has(m.id);
+  const dadLocked=md.dad.locked, sonLocked=md.son.locked;
+  const hasResult=md.result!==null;
+
+  // card class
+  let cardCls=m.id==='FIN'?'big':m.big?'big':m.fr?'fr-match':m.sc?'sc-match':'';
+  if(hasResult) cardCls+=' done';
+
+  // status badge
+  let statusTxt, statusCls;
+  if(hasResult){statusTxt='✅ Settled';statusCls='ms-done';}
+  else if(dadLocked&&sonLocked){statusTxt='🔒 Both locked';statusCls='ms-locked';}
+  else if(dadLocked||sonLocked){statusTxt='⏳ 1 locked';statusCls='ms-partial';}
+  else{statusTxt='Open';statusCls='ms-open';}
+
+  const ht=md.homeTeam||m.h, at=md.awayTeam||m.a;
+  const homeDisp=m.editable?`<span class="editable-team" contenteditable="true" onblur="updateTeam('${m.id}','h',this.textContent.trim())" onclick="event.stopPropagation()">${ht}</span>`:ht;
+  const awayDisp=m.editable?`<span class="editable-team" contenteditable="true" onblur="updateTeam('${m.id}','a',this.textContent.trim())" onclick="event.stopPropagation()">${at}</span>`:at;
+
+  // points
+  const {dadPts,sonPts}=hasResult?calcPoints(md,m):{dadPts:0,sonPts:0};
+
+  return `
+  <div class="match-card ${cardCls}" id="mc_${m.id}">
+    <div class="match-head" onclick="toggleMatch('${m.id}')">
+      <div class="match-flags">${m.flags}</div>
+      <div class="match-centre">
+        <div class="match-name">${homeDisp} <span style="color:var(--muted);font-weight:300">vs</span> ${awayDisp}</div>
+        <div class="match-info">📍 ${m.venue}</div>
+      </div>
+      <div class="match-right">
+        <div class="match-time">${m.time} BST</div>
+        <div class="match-date">${m.date}</div>
+        <div class="match-status ${statusCls}">${statusTxt}</div>
+      </div>
+    </div>
+    <div class="match-body${isOpen?' open':''}" id="mb_${m.id}">
+      ${renderPersonPanel(m, md, 'dad', dadLocked, hasResult, ht, at)}
+      ${renderPersonPanel(m, md, 'son', sonLocked, hasResult, ht, at)}
+      ${renderResultSection(m, md, ht, at, hasResult, dadPts, sonPts)}
+      ${renderCommentSection(m.id)}
+    </div>
+  </div>`;
+}
+
+function renderPersonPanel(m, md, who, locked, hasResult, ht, at){
+  const p=md[who];
+  const isDad=who==='dad';
+  const name=isDad?'Steven':'James';
+  const role=isDad?'Dad 👨':'Son 👦';
+  const panelCls=isDad?'dad-panel':'son-panel';
+  const avCls=isDad?'av-dad':'av-son';
+  const color=isDad?'var(--dad)':'var(--son)';
+  const bqCls=isDad?'dad-q':'son-q';
+  const submitCls=isDad?'submit-dad':'submit-son';
+
+  const lockBadge=locked
+    ?`<span class="locked-badge">🔒 Locked in!</span>`
+    :`<span class="locked-badge pending">Not yet submitted</span>`;
+
+  // score inputs
+  const scoreHTML=`
+    <div class="score-section">
+      <div class="score-lbl">Predicted score</div>
+      <div class="score-row">
+        <div class="team-lbl">${ht}</div>
+        <input class="score-box" type="number" min="0" max="20" placeholder="0"
+          value="${p.scoreH}" ${locked||hasResult?'disabled':''}
+          oninput="setScore('${m.id}','${who}','scoreH',this.value)"/>
+        <span class="score-dash">–</span>
+        <input class="score-box" type="number" min="0" max="20" placeholder="0"
+          value="${p.scoreA}" ${locked||hasResult?'disabled':''}
+          oninput="setScore('${m.id}','${who}','scoreA',this.value)"/>
+        <div class="team-lbl">${at}</div>
+      </div>
+    </div>`;
+
+  // bonus questions
+  const bonusHTML=(m.bonus||[]).map((bq,i)=>{
+    const selected=p.bonus[i]||'';
+    const opts=bq.opts.map(o=>`<button class="bq-opt${selected===o?` sel-${who}`:''}" onclick="setBonus('${m.id}','${who}',${i},'${o}')" ${locked||hasResult?'disabled':''}>${o}</button>`).join('');
+    return `<div class="bonus-q ${bqCls}"><div class="bq-text">⭐ ${bq.q}</div><div class="bq-options">${opts}</div></div>`;
+  }).join('');
+
+  const canSubmit=!locked&&!hasResult&&p.scoreH!==''&&p.scoreA!=='';
+
+  const submitBtn=locked||hasResult
+    ?`<button class="submit-btn locked-state" disabled>🔒 ${locked?`${name}'s prediction is locked in`:'Match already settled'}</button>`
+    :`<button class="submit-btn ${submitCls}" ${canSubmit?'':' disabled'} onclick="lockPrediction('${m.id}','${who}')">${canSubmit?`🔒 Lock in ${name}'s prediction`:`Enter a score first to lock in`}</button>`;
+
+  return `
+  <div class="person-panel ${panelCls}">
+    <div class="panel-header">
+      <div class="panel-who">
+        <div class="panel-avatar ${avCls}">${name[0]}</div>
+        <div><div class="panel-name">${name}</div><div class="panel-role">${role}</div></div>
+      </div>
+      ${lockBadge}
+    </div>
+    ${scoreHTML}
+    <div class="bonus-section">
+      <div class="bonus-lbl">Bonus questions <span>½ pt each</span></div>
+      ${bonusHTML}
+    </div>
+    ${submitBtn}
+  </div>`;
+}
+
+function renderResultSection(m, md, ht, at, hasResult, dadPts, sonPts){
+  const actualScore=hasResult?`${md.actualH} – ${md.actualA}`:'';
+  const ptsHTML=hasResult?`
+    <div class="points-display">
+      <div class="pts-box dad-pts"><span class="pts-num">${dadPts}</span><span class="pts-lbl">Steven's points</span></div>
+      <div class="pts-box son-pts"><span class="pts-num">${sonPts}</span><span class="pts-lbl">James's points</span></div>
+    </div>`:'';
+
+  return `
+  <div class="result-section">
+    <div class="result-lbl">⚙️ Admin — enter actual result ${hasResult?`<span style="color:var(--green);font-weight:700">✅ ${ht} ${actualScore} ${at}</span>`:''}</div>
+    <div class="result-btns">
+      <button class="res-btn${md.result==='h'?' r-dad':''}" onclick="setResult('${m.id}','h')">${ht} win</button>
+      <button class="res-btn${md.result==='d'?' r-draw':''}" onclick="setResult('${m.id}','d')">Draw</button>
+      <button class="res-btn${md.result==='a'?' r-son':''}" onclick="setResult('${m.id}','a')">${at} win</button>
+      ${hasResult?`<button class="res-btn" onclick="clearResult('${m.id}')" style="flex:0 0 32px">↩</button>`:''}
+    </div>
+    ${hasResult?`
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <div style="flex:1">
+        <div style="font-size:.63rem;color:var(--muted);margin-bottom:3px">Actual score</div>
+        <div style="display:flex;gap:5px;align-items:center">
+          <input class="score-box" style="width:40px;height:36px;font-size:1rem" type="number" min="0" max="20" value="${md.actualH}" oninput="setActual('${m.id}','h',this.value)" placeholder="0"/>
+          <span class="score-dash" style="font-size:1rem">–</span>
+          <input class="score-box" style="width:40px;height:36px;font-size:1rem" type="number" min="0" max="20" value="${md.actualA}" oninput="setActual('${m.id}','a',this.value)" placeholder="0"/>
+        </div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:.63rem;color:var(--muted);margin-bottom:3px">Bonus answers</div>
+        ${(m.bonus||[]).map((bq,i)=>`
+          <div style="font-size:.7rem;margin-bottom:4px">${bq.q.substring(0,30)}…
+            <select style="font-size:.7rem;border:1px solid var(--border);border-radius:4px;padding:2px 4px;margin-left:4px" onchange="setBonusAnswer('${m.id}',${i},this.value)">
+              <option value="">—</option>
+              ${bq.opts.map(o=>`<option value="${o}"${(md.bonusAnswers||{})[i]===o?' selected':''}>${o}</option>`).join('')}
+            </select>
+          </div>`).join('')}
+      </div>
+    </div>`:''}
+    ${ptsHTML}
+  </div>`;
+}
+
+function renderCommentSection(matchId){
+  const comments=state.comments[matchId]||[];
+  const cList=comments.length
+    ?comments.map(c=>`<div class="comment-item"><div class="ci-avatar" style="background:${c.who==='dad'?'var(--dad)':'var(--son)'}">${c.who==='dad'?'S':'J'}</div><div class="ci-bubble">${escHtml(c.text)}</div><div class="ci-time">${c.time}</div></div>`).join('')
+    :`<div class="empty" style="padding:8px 0">No comments yet — add a reaction!</div>`;
+
+  return `
+  <div class="comment-section">
+    <div style="font-size:.63rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:7px;font-weight:600">💬 Comments</div>
+    <div class="comment-list" id="cl_${matchId}">${cList}</div>
+    <div class="comment-input-row">
+      <div class="ci-who">
+        <button class="ci-who-btn${commentAuthor==='dad'?' sel-dad':''}" onclick="setAuthor('dad')">Steven</button>
+        <button class="ci-who-btn${commentAuthor==='son'?' sel-son':''}" onclick="setAuthor('son')">James</button>
+      </div>
+      <input class="ci-input" id="cin_${matchId}" placeholder="Add a comment…" onkeydown="if(event.key==='Enter')addComment('${matchId}')"/>
+      <button class="ci-send" onclick="addComment('${matchId}')">Send</button>
+    </div>
+  </div>`;
+}
+
+// ─── RENDER SCHEDULE ─────────────────────────────────────────────────────────
+const SCHED_FILTERS=['all','France','Scotland','Big matches','🏆 Final'];
+function renderScheduleFilter(){
+  document.getElementById('schedFilter').innerHTML=SCHED_FILTERS.map(f=>
+    `<button class="sf-btn${schedFilter===f?' on':''}" onclick="setSF('${f}')">${f==='all'?'All':f}</button>`
+  ).join('');
+}
+function filteredSched(){
+  if(schedFilter==='all') return SCHEDULE;
+  if(schedFilter==='France') return SCHEDULE.filter(s=>s.fr);
+  if(schedFilter==='Scotland') return SCHEDULE.filter(s=>s.sc);
+  if(schedFilter==='Big matches') return SCHEDULE.filter(s=>s.big);
+  if(schedFilter==='🏆 Final') return SCHEDULE.filter(s=>s.group==='🏆 Final');
+  return SCHEDULE;
+}
+function renderSchedule(){
+  renderScheduleFilter();
+  const list=filteredSched();
+  const byGroup={};
+  list.forEach(s=>{if(!byGroup[s.group])byGroup[s.group]=[];byGroup[s.group].push(s);});
+  document.getElementById('schedGrid').innerHTML=Object.keys(byGroup).map(g=>`
+    <div class="sched-group">
+      <div class="sg-title">${g}</div>
+      ${byGroup[g].map(s=>`
+        <div class="sched-row${s.big?' highlight':''}${s.fr?' fr':''}${s.sc?' sc':''}">
+          <div class="sched-flags">${s.flags}</div>
+          <div class="sched-match">
+            <div class="sched-teams">${s.h}${s.a?' vs '+s.a:''}</div>
+            <div class="sched-venue">${s.venue}</div>
+          </div>
+          <div class="sched-time-col">
+            <div class="sched-time">${s.time} BST</div>
+            <div class="sched-date">${s.date}</div>
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+// ─── RENDER LIVRE D'OR ────────────────────────────────────────────────────────
+function renderLivre(){
+  const entries=MATCHES.map(m=>{const c=state.comments[m.id];return c&&c.length?{m,comments:c,md:state.matches[m.id]}:null;}).filter(Boolean);
+  const g=document.getElementById('livreGrid');
+  if(!entries.length){g.innerHTML='<div class="empty">No comments yet — open a match and leave a reaction!</div>';return;}
+  g.innerHTML=entries.map(({m,comments,md})=>`
+    <div class="livre-entry">
+      <div class="le-match">${md.homeTeam||m.h} vs ${md.awayTeam||m.a}</div>
+      <div class="le-meta">${m.stage} · ${m.date} · ${m.venue}</div>
+      ${comments.map(c=>`<div class="le-comment"><span class="lc-who ${c.who}">${c.who==='dad'?'👨 Steven':'👦 James'}</span><span>${escHtml(c.text)}</span></div>`).join('')}
+    </div>`).join('');
+}
+
+// ─── RENDER SUMMARY ───────────────────────────────────────────────────────────
+function renderSummary(){
+  let dadTotal=0, sonTotal=0, settled=0, open=0;
+  const rows=[];
+  MATCHES.forEach(m=>{
+    const md=state.matches[m.id];
+    if(!md) return;
+    if(md.result){
+      settled++;
+      const {dadPts,sonPts}=calcPoints(md,m);
+      dadTotal+=dadPts; sonTotal+=sonPts;
+      rows.push({match:`${md.homeTeam||m.h} vs ${md.awayTeam||m.a}`,date:m.date,dadPts,sonPts});
+    } else { open++; }
+  });
+
+  document.getElementById('dadScore').textContent=dadTotal;
+  document.getElementById('sonScore').textContent=sonTotal;
+  document.getElementById('sumDad').textContent=dadTotal;
+  document.getElementById('sumSon').textContent=sonTotal;
+  document.getElementById('sumSettled').textContent=settled;
+  document.getElementById('sumOpen').textContent=open;
+
+  const wb=document.getElementById('winnerBanner');
+  if(dadTotal!==sonTotal&&settled>0){
+    const winner=dadTotal>sonTotal?'Steven 👨':'James 👦';
+    const margin=Math.abs(dadTotal-sonTotal);
+    wb.innerHTML=`<div class="final-winner"><div class="fw-label">Current Leader</div><div class="fw-name">${winner}</div><div class="fw-sub">Leading by ${margin} point${margin!==1?'s':''} — ${open} match${open!==1?'es':''} to go</div></div>`;
+  } else if(settled>0){
+    wb.innerHTML=`<div class="final-winner" style="background:linear-gradient(135deg,#95a5a6,#7f8c8d)"><div class="fw-label">Current Standing</div><div class="fw-name" style="font-size:1.4rem">It's a draw!</div><div class="fw-sub">${open} match${open!==1?'es':''} to go</div></div>`;
+  } else { wb.innerHTML=''; }
+
+  const detail=document.getElementById('sumDetail');
+  if(!rows.length){detail.innerHTML='<div class="empty">No settled matches yet.</div>';return;}
+  detail.innerHTML=rows.map(r=>`
+    <div class="sum-card" style="padding:11px 13px;margin-bottom:7px">
+      <div style="font-size:.8rem;font-weight:700;margin-bottom:7px">${r.match} <span style="font-size:.65rem;color:var(--muted);font-weight:400">${r.date}</span></div>
+      <div style="display:flex;gap:8px">
+        <div style="flex:1;text-align:center;padding:6px;background:var(--dadbg);border-radius:7px;color:var(--dad)"><span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;line-height:1">${r.dadPts}</span><div style="font-size:.6rem;text-transform:uppercase;letter-spacing:.07em">Steven</div></div>
+        <div style="flex:1;text-align:center;padding:6px;background:var(--sonbg);border-radius:7px;color:var(--son)"><span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;line-height:1">${r.sonPts}</span><div style="font-size:.6rem;text-transform:uppercase;letter-spacing:.07em">James</div></div>
+      </div>
+    </div>`).join('');
+}
+
+function renderAll(){
+  renderMatchFilter();
+  renderMatches();
+  renderScheduleFilter();
+  renderSchedule();
+  renderLivre();
+  renderSummary();
+}
+
+// ─── ACTIONS ─────────────────────────────────────────────────────────────────
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('page-'+id).classList.add('on');
+  btn.classList.add('on');
+  renderAll();
+}
+function setMF(f){matchFilter=f;renderMatchFilter();renderMatches();}
+function setSF(f){schedFilter=f;renderScheduleFilter();renderSchedule();}
+function toggleMatch(id){if(openMatches.has(id))openMatches.delete(id);else openMatches.add(id);renderMatches();}
+function updateTeam(id,side,val){const md=state.matches[id];if(!md)return;if(side==='h')md.homeTeam=val;else md.awayTeam=val;save();}
+function setScore(id,who,key,val){const md=state.matches[id];if(!md||md[who].locked)return;md[who][key]=val;save();
+  // re-render just the submit button dynamically
+  renderMatches();}
+function setBonus(id,who,idx,val){const md=state.matches[id];if(!md||md[who].locked)return;md[who].bonus[idx]=val;save();renderMatches();}
+function lockPrediction(id,who){
+  const md=state.matches[id];
+  if(!md)return;
+  const p=md[who];
+  if(p.scoreH===''||p.scoreA===''){showToast('Enter a score first!');return;}
+  if(p.locked){showToast('Already locked!');return;}
+  const name=who==='dad'?'Steven':'James';
+  if(!confirm(`Lock in ${name}'s prediction? This cannot be changed!`))return;
+  p.locked=true;
+  save();renderAll();
+  openMatches.add(id);
+  showToast(`🔒 ${name}'s prediction is locked in!`);
+}
+function setResult(id,res){
+  const md=state.matches[id];if(!md)return;
+  md.result=res;
+  // prompt for actual score if not set
+  save();renderAll();openMatches.add(id);
+  showToast('Result set! Enter actual score to calculate points.');
+}
+function clearResult(id){const md=state.matches[id];if(!md)return;md.result=null;md.actualH='';md.actualA='';md.bonusAnswers={};save();renderAll();openMatches.add(id);}
+function setActual(id,side,val){const md=state.matches[id];if(!md)return;if(side==='h')md.actualH=val;else md.actualA=val;save();renderSummary();}
+function setBonusAnswer(id,idx,val){const md=state.matches[id];if(!md)return;if(!md.bonusAnswers)md.bonusAnswers={};md.bonusAnswers[idx]=val;save();renderMatches();openMatches.add(id);}
+function setAuthor(who){commentAuthor=who;renderMatches();}
+function addComment(matchId){
+  const input=document.getElementById('cin_'+matchId);if(!input)return;
+  const text=input.value.trim();if(!text){showToast('Type something!');return;}
+  if(!state.comments[matchId])state.comments[matchId]=[];
+  const now=new Date();
+  state.comments[matchId].push({who:commentAuthor,text,time:now.toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})});
+  input.value='';save();renderAll();openMatches.add(matchId);
+  setTimeout(()=>{const cl=document.getElementById('cl_'+matchId);if(cl)cl.scrollTop=cl.scrollHeight;},80);
+}
+function exportLivre(){
+  let txt='═══════════════════════════════════\n   LIVRE D\'OR — WORLD CUP 2026\n   Steven 👨 & James 👦 — Father & Son\n═══════════════════════════════════\n\n';
+  MATCHES.forEach(m=>{
+    const c=state.comments[m.id];const md=state.matches[m.id];
+    if(c&&c.length){
+      txt+=`${md?.homeTeam||m.h} vs ${md?.awayTeam||m.a}\n${m.stage} · ${m.date}\n${'─'.repeat(36)}\n`;
+      c.forEach(x=>{txt+=`  [${x.who==='dad'?'Steven':'James'}]  ${x.text}\n`;});
+      txt+='\n';
+    }
+  });
+  if(txt.split('\n').length<8){showToast('No comments yet!');return;}
+  const blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='LivreOr_WC2026_StevenJames.txt';a.click();
+}
+function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
+
+renderAll();
+</script>
+</body>
+</html>
